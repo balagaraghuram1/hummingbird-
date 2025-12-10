@@ -79,3 +79,4 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+# v1 - updated 2026-06-11
