@@ -1,19 +1,81 @@
 # Python
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.mypy_cache/
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Environments
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Virtual environments
 .env
 .venv/
 venv/
-
-# Data & logs
-logs/
-data/chroma_db/
+ENV/
 
 # IDE
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
 
+# OS
+.DS_Store
+Thumbs.db
+
+# Data & logs
+logs/
+data/chroma_db/
+data/embeddings/
+*.db
+*.sqlite3
+
+# Docker
+docker-compose.prod.yml
+
+# Environment files
+.env.local
+.env.production
+.env.staging
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project
+project-structure.md
+main.py
+medical_ai_model.py
+
+# Scripts
+scripts/
+
+# Docs
+docs/

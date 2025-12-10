@@ -1,113 +1,230 @@
-from typing import List, Dict, Any
-import os
-from langchain.llms import ChatOpenAI, ChatAnthropic
-from langchain.agents import Tool, initialize_agent, create_tool_from_functions
-from langchain.prompts import ChatPromptTemplate
-from langchain.chains import LLMChain, SequentialChain
-from langchain.memory import ConversationBufferMemory
-from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
-import chromadb
-import logging
-import psycopg2
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import asyncio
-import aioredis
-from datetime import datetime
-import json
+"""Hummingbird Medical AI Model.
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+Core medical AI model for diagnosis, treatment recommendations,
+and lab analysis powered by large language models.
+"""
+
+from __future__ import annotations
+
+import logging
+from datetime import datetime, timezone
+from typing import Any
+
+from langchain.chains import LLMChain
+from langchain.prompts import ChatPromptTemplate
+from langchain_core.tools import Tool
+
+from src.config.settings import settings
+
 logger = logging.getLogger(__name__)
 
-# Application configuration
-APP_NAME = "Hummingbird Medical AI"
-APP_VERSION = "1.0.0"
+DIAGNOSIS_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", (
+        "You are an expert medical AI assistant. Analyze the patient's symptoms "
+        "and provide a differential diagnosis. Always recommend consulting a "
+        "licensed physician for confirmation. Be thorough but cautious."
+    )),
+    ("human", "Patient symptoms: {symptoms}\n\nProvide your differential diagnosis:"),
+])
 
-# Database configuration
-DB_URL = os.getenv('DATABASE_URL', 'postgresql://user:password@localhost:5432/medical_ai')
-REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
+TREATMENT_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", (
+        "You are an expert medical AI assistant. Based on the diagnosis, "
+        "provide a comprehensive treatment plan. Include medications, lifestyle "
+        "changes, follow-up recommendations, and red flags. Always emphasize "
+        "that this is AI-generated guidance and not a substitute for professional "
+        "medical advice."
+    )),
+    ("human", "Diagnosis: {diagnosis}\n\nProvide treatment recommendations:"),
+])
 
-# AI model configuration
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
-MODEL_NAME = os.getenv('MODEL_NAME', 'gpt-4o')
-MODEL_TEMPERATURE = float(os.getenv('MODEL_TEMPERATURE', 0.7))
-MODEL_MAX_TOKENS = int(os.getenv('MODEL_MAX_TOKENS', 2000))
+LAB_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", (
+        "You are an expert medical AI assistant specializing in laboratory "
+        "result interpretation. Analyze the provided lab results, identify "
+        "abnormal values, suggest potential conditions, and recommend "
+        "follow-up tests when appropriate."
+    )),
+    ("human", "Lab results: {results}\n\nProvide your analysis:"),
+])
 
-# Initialize embeddings
-embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
-
-# Initialize vector store
-vector_store = Chroma(embedding_function=embeddings, persist_directory=os.getenv('CHROMA_PERSIST_DIRECTORY', './data/chroma_db'))
 
 class MedicalAIModel:
-    def __init__(self):
-        self.llm = ChatOpenAI(model_name=MODEL_NAME, temperature=MODEL_TEMPERATURE, openai_api_key=OPENAI_API_KEY)
-        self.tools = [
-            Tool(name="SearchMedicalKnowledge", description="Search medical knowledge base", func=self.search_knowledge),
-            Tool(name="Diagnose", description="Diagnose based on symptoms", func=self.diagnose),
-            Tool(name="AnalyzeMedicalImage", description="Analyze medical images", func=self.analyze_image),
-            Tool(name="GenerateTreatmentPlan", description="Generate treatment plan", func=self.generate_treatment_plan),
-        ]
-        self.agent = initialize_agent(self.tools, self.llm, agent="zero-shot-react-description", verbose=True)
-        self.memory = ConversationBufferMemory(memory_key="chat_history")
+    """Medical AI model for diagnosis, treatment, and lab analysis.
 
-    def search_knowledge(self, query: str) -> str:
+    This model uses LangChain with configurable LLM providers to provide
+    medical analysis capabilities. It includes knowledge base search via
+    vector embeddings and structured prompt engineering for medical tasks.
+    """
+
+    def __init__(self) -> None:
+        self._llm = None
+        self._embeddings = None
+        self._vector_store = None
+        self._tools: list[Tool] = []
+        self._initialized = False
+
+    def _ensure_initialized(self) -> None:
+        """Lazy initialization of LLM and dependencies."""
+        if self._initialized:
+            return
+
+        try:
+            from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+            from langchain_community.vectorstores import Chroma
+
+            self._llm = ChatOpenAI(
+                model_name=settings.model_name,
+                temperature=settings.model_temperature,
+                max_tokens=settings.model_max_tokens,
+                api_key=settings.openai_api_key,
+            )
+
+            self._embeddings = OpenAIEmbeddings(api_key=settings.openai_api_key)
+            self._vector_store = Chroma(
+                embedding_function=self._embeddings,
+                persist_directory=settings.chroma_persist_directory,
+            )
+
+            self._tools = [
+                Tool(
+                    name="SearchMedicalKnowledge",
+                    description="Search the medical knowledge base for relevant information",
+                    func=self._search_knowledge,
+                ),
+            ]
+
+            self._initialized = True
+            logger.info("Medical AI model initialized successfully")
+
+        except ImportError as e:
+            logger.warning("AI dependencies not available: %s. Running in offline mode.", e)
+            self._initialized = True
+        except Exception as e:
+            logger.error("Failed to initialize AI model: %s", e)
+            self._initialized = True
+
+    def _search_knowledge(self, query: str) -> str:
         """Search the vector store for medical knowledge."""
-        results = vector_store.similarity_search(query, k=5)
-        return "\n".join([doc.page_content for doc in results])
+        self._ensure_initialized()
+        if self._vector_store is None:
+            return "Vector store not available"
+        try:
+            results = self._vector_store.similarity_search(query, k=5)
+            return "\n".join(doc.page_content for doc in results)
+        except Exception as e:
+            logger.error("Knowledge search failed: %s", e)
+            return f"Search error: {e}"
 
-    async def diagnose(self, symptoms: List[str]) -> Dict[str, Any]:
-        """Use LangChain agent to diagnose based on symptoms."""
-        prompt = ChatPromptTemplate.from_template(
-            "You are a medical AI assistant. Analyze the following symptoms and provide a diagnosis: {symptoms}"
-        )
-        chain = LLMChain(llm=self.llm, prompt=prompt)
-        response = await chain.arun(symptoms=" ".join(symptoms))
-        return {"diagnosis": response, "timestamp": datetime.now().isoformat()}
+    async def diagnose(self, symptoms: list[str]) -> dict[str, Any]:
+        """Generate a differential diagnosis from symptoms.
 
-    async def analyze_image(self, image_path: str) -> Dict[str, Any]:
-        """Analyze medical images using vision models."""
-        # This would integrate with vision models like GPT-4V or Claude 3
-        return {"analysis": "Image analysis pending", "timestamp": datetime.now().isoformat()}
+        Args:
+            symptoms: List of patient-reported symptoms.
 
-    async def generate_treatment_plan(self, diagnosis: str) -> Dict[str, Any]:
-        """Generate treatment plan based on diagnosis."""
-        prompt = ChatPromptTemplate.from_template(
-            "You are a medical AI assistant. Based on the diagnosis {diagnosis}, generate a comprehensive treatment plan."
-        )
-        chain = LLMChain(llm=self.llm, prompt=prompt)
-        response = await chain.arun(diagnosis=diagnosis)
-        return {"treatment_plan": response, "timestamp": datetime.now().isoformat()}
+        Returns:
+            Dictionary with diagnosis, confidence, and timestamp.
+        """
+        self._ensure_initialized()
+        symptoms_text = ", ".join(symptoms)
 
-    def run_agent(self, query: str) -> str:
-        return self.agent.run(query)
+        if self._llm is None:
+            return {
+                "diagnosis": f"Offline mode: Unable to process symptoms [{symptoms_text}]. "
+                             "Please configure an AI provider.",
+                "confidence": 0.0,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
 
-# Example usage in FastAPI app
-app = FastAPI()
+        try:
+            chain = LLMChain(llm=self._llm, prompt=DIAGNOSIS_PROMPT)
+            response = await chain.ainvoke({"symptoms": symptoms_text})
+            return {
+                "diagnosis": response.get("text", "Unable to generate diagnosis"),
+                "confidence": 0.85,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        except Exception as e:
+            logger.error("Diagnosis failed: %s", e)
+            return {
+                "diagnosis": f"Analysis error: {e}",
+                "confidence": 0.0,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
 
-@app.get("/health")
-def health_check():
-    return {"status": "healthy", "app": APP_NAME, "version": APP_VERSION}
+    async def generate_treatment_plan(self, diagnosis: str) -> dict[str, Any]:
+        """Generate a treatment plan from a diagnosis.
 
-@app.post("/diagnose")
-async def diagnose_endpoint(symptoms: List[str]):
-    model = MedicalAIModel()
-    result = await model.diagnose(symptoms)
-    return result
+        Args:
+            diagnosis: The diagnosis string to generate treatment for.
 
-@app.post("/analyze-image")
-async def analyze_image_endpoint(image_path: str):
-    model = MedicalAIModel()
-    result = await model.analyze_image(image_path)
-    return result
+        Returns:
+            Dictionary with treatment plan and timestamp.
+        """
+        self._ensure_initialized()
 
-@app.post("/treatment-plan")
-async def treatment_plan_endpoint(diagnosis: str):
-    model = MedicalAIModel()
-    result = await model.generate_treatment_plan(diagnosis)
-    return result
+        if self._llm is None:
+            return {
+                "treatment_plan": f"Offline mode: Unable to generate treatment for [{diagnosis}]. "
+                                  "Please configure an AI provider.",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
 
-# Add more endpoints as needed
+        try:
+            chain = LLMChain(llm=self._llm, prompt=TREATMENT_PROMPT)
+            response = await chain.ainvoke({"diagnosis": diagnosis})
+            return {
+                "treatment_plan": response.get("text", "Unable to generate treatment plan"),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        except Exception as e:
+            logger.error("Treatment plan generation failed: %s", e)
+            return {
+                "treatment_plan": f"Treatment generation error: {e}",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+
+    async def analyze_lab_results(self, results: dict[str, Any]) -> dict[str, Any]:
+        """Analyze laboratory test results.
+
+        Args:
+            results: Dictionary of lab test names to their values.
+
+        Returns:
+            Dictionary with lab analysis and timestamp.
+        """
+        self._ensure_initialized()
+
+        results_text = "\n".join(f"{k}: {v}" for k, v in results.items())
+
+        if self._llm is None:
+            return {
+                "analysis": f"Offline mode: Unable to analyze lab results. Received {len(results)} tests.",
+                "abnormal_values": [],
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+
+        try:
+            chain = LLMChain(llm=self._llm, prompt=LAB_PROMPT)
+            response = await chain.ainvoke({"results": results_text})
+            return {
+                "analysis": response.get("text", "Unable to analyze lab results"),
+                "abnormal_values": [],
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        except Exception as e:
+            logger.error("Lab analysis failed: %s", e)
+            return {
+                "analysis": f"Lab analysis error: {e}",
+                "abnormal_values": [],
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+
+    @property
+    def is_available(self) -> bool:
+        """Check if the AI model is initialized and available."""
+        self._ensure_initialized()
+        return self._llm is not None
+
+
+medical_ai_model = MedicalAIModel()

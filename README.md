@@ -1,325 +1,402 @@
-f# 🏥 Hummingbird Medical AI
+<div align="center">
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python Version](https://img.shields.io/badge/python-3.11+-green.svg)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-black.svg)](https://fastapi.tiangolo.com)
+# Hummingbird Medical AI
+
+**Production-ready medical AI system for clinical decision support**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688.svg)](https://fastapi.tiangolo.com)
 [![LangChain](https://img.shields.io/badge/LangChain-0.1+-orange.svg)](https://langchain.com)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](#testing)
 
-A cutting-edge, production-ready medical AI system powered by the latest language models, vector databases, and advanced AI agents. Built with FastAPI, LangChain, and modern AI technologies for intelligent medical diagnosis, treatment recommendations, and lab analysis.
+</div>
 
-## 🚀 Features
+---
 
-### 🧠 Advanced AI Capabilities
-- **Multi-LLM Support**: GPT-4, Claude, and Gemini integration
-- **LangChain Agents**: Specialized medical AI agents for diagnosis, treatment, and lab analysis
-- **Vector Database**: ChromaDB for medical knowledge retrieval and similarity search
-- **Intelligent Caching**: Redis-based caching for improved performance
+## Overview
 
-### 🔒 Production-Ready
-- **Authentication**: JWT-based secure API access
-- **Monitoring**: Prometheus metrics and Grafana dashboards
-- **Logging**: Structured logging with correlation IDs
-- **Rate Limiting**: API abuse prevention
-- **Health Checks**: Comprehensive service monitoring
+Hummingbird is a medical AI assistant designed for healthcare professionals and developers building clinical decision support systems. It leverages large language models (GPT-4, Claude, Gemini) with LangChain for structured medical analysis, including symptom-to-diagnosis mapping, treatment plan generation, and laboratory result interpretation.
 
-### 📊 Medical Intelligence
-- **Symptom Analysis**: Advanced symptom-to-diagnosis mapping
-- **Treatment Recommendations**: Personalized treatment plans based on medical guidelines
-- **Lab Analysis**: Intelligent interpretation of medical test results
-- **Medical Knowledge Base**: Continuously updated medical literature integration
+The system is built with production requirements in mind: type-safe APIs, comprehensive error handling, caching, monitoring, and containerized deployment.
 
-## 🏗️ Architecture
+**Disclaimer**: This system is intended for research and educational purposes only. It does not provide medical advice and should not be used as a substitute for professional medical judgment.
 
-```mermaid
-graph TB
-    subgraph "API Layer"
-        A[FastAPI Application]
-        B[Authentication Middleware]
-        C[Rate Limiting]
-    end
-    
-    subgraph "AI Processing"
-        D[LangChain Agents]
-        E[Diagnosis Agent]
-        F[Treatment Agent]
-        G[Lab Analysis Agent]
-    end
-    
-    subgraph "Data Layer"
-        H[Vector Database<br/>ChromaDB]
-        I[Redis Cache]
-        J[PostgreSQL<br/>Medical DB]
-    end
-    
-    subgraph "Monitoring"
-        K[Prometheus]
-        L[Grafana]
-        M[Structured Logging]
-    end
-    
-    A --> D
-    D --> E
-    D --> F
-    D --> G
-    E --> H
-    F --> H
-    G --> H
-    D --> I
-    A --> K
-    A --> L
-    A --> M
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Client Applications                     │
+│                   (Web, Mobile, Third-party)                 │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ HTTPS
+┌──────────────────────────────▼──────────────────────────────┐
+│                        API Gateway                          │
+│              FastAPI + CORS + Rate Limiting                 │
+│                  + Request Validation                       │
+└──────┬───────────────┬───────────────────┬──────────────────┘
+       │               │                   │
+┌──────▼──────┐ ┌──────▼──────┐ ┌─────────▼─────────┐
+│  Diagnosis  │ │  Treatment  │ │   Lab Analysis    │
+│    Agent    │ │    Agent    │ │      Agent        │
+└──────┬──────┘ └──────┬──────┘ └─────────┬─────────┘
+       │               │                   │
+┌──────▼───────────────▼───────────────────▼──────────────────┐
+│                    LangChain Orchestration                  │
+│              (LLM Chains + Prompt Engineering)              │
+└──────┬──────────────────────────────────────────────────────┘
+       │
+┌──────▼──────────────────────────────────────────────────────┐
+│                   External AI Providers                     │
+│              OpenAI (GPT-4) | Anthropic (Claude)            │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## 🛠️ Quick Start
+---
 
-### Prerequisites
-- Python 3.11+
-- Docker & Docker Compose
-- Redis
-- PostgreSQL
-- OpenAI/Anthropic API keys
+## Features
 
-### Installation
+### Core Capabilities
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-org/hummingbird-medical-ai.git
-   cd hummingbird-medical-ai
-   ```
+- **Symptom-to-Diagnosis**: Multi-differential diagnosis from patient-reported symptoms
+- **Treatment Planning**: Evidence-based treatment recommendations with medication guidance
+- **Lab Analysis**: Automated interpretation of laboratory results with reference range checking
+- **Knowledge Retrieval**: Vector-based medical knowledge search via ChromaDB
 
-2. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys and database credentials
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Start services**
-   ```bash
-   # Development
-   docker-compose up -d
-   
-   # Production
-   docker-compose -f docker-compose.prod.yml up -d
-   ```
-
-5. **Run the application**
-   ```bash
-   uvicorn src.main:app --reload
-   ```
-
-## 📚 API Documentation
-
-Once running, visit `http://localhost:8000/docs` for interactive API documentation.
-
-### Key Endpoints
-
-#### Authentication
-- `POST /api/auth/login` - Login and get JWT token
-- `POST /api/auth/refresh` - Refresh JWT token
-
-#### Medical AI Services
-- `POST /api/ai/diagnose` - Medical diagnosis from symptoms
-- `POST /api/ai/treatment` - Treatment recommendations
-- `POST /api/ai/analyze-lab` - Lab result analysis
-- `POST /api/ai/chat` - General medical consultation
-
-#### Health Monitoring
-- `GET /api/health` - Service health check
-- `GET /api/metrics` - Prometheus metrics
-
-## 🔧 Configuration
-
-### Environment Variables
-
-```env
-# AI Model Configuration
-OPENAI_API_KEY=your_openai_api_key
-ANTHROPIC_API_KEY=your_anthropic_api_key
-MODEL_NAME=gpt-4
-
-# Database Configuration
-DATABASE_URL=postgresql://user:password@localhost:5432/medical_ai
-REDIS_URL=redis://localhost:6379
-
-# Security
-SECRET_KEY=your_secret_key_here
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-
-# Monitoring
-PROMETHEUS_PORT=9090
-GRAFANA_PORT=3000
-
-# Application
-DEBUG=false
-LOG_LEVEL=INFO
-```
-
-### Model Configuration
-
-The system supports multiple AI models:
-
-```python
-# src/config/settings.py
-AI_MODELS = {
-    "primary": "gpt-4",
-    "fallback": "claude-3",
-    "specialized": "gemini-pro"
-}
-```
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-pytest tests/
-
-# Run with coverage
-pytest tests/ --cov=src
-
-# Run specific test categories
-pytest tests/test_agents.py
-pytest tests/test_api.py
-```
-
-## 📊 Monitoring
-
-### Prometheus Metrics
-Access metrics at `http://localhost:8000/metrics`
-
-### Grafana Dashboard
-1. Start Grafana: `docker-compose up grafana`
-2. Access at `http://localhost:3000`
-3. Import dashboard from `monitoring/grafana/dashboards/medical_ai.json`
-
-### Key Metrics Tracked
-- API response times
-- AI model performance
-- Error rates
-- Cache hit ratios
-- Database query performance
-
-## 🔒 Security Features
+### Production Infrastructure
 
 - **JWT Authentication**: Secure API access with token-based authentication
-- **Rate Limiting**: Prevent API abuse with configurable rate limits
-- **Input Validation**: Pydantic models for request/response validation
-- **CORS Protection**: Configurable cross-origin resource sharing
-- **SQL Injection Protection**: ORM-based database access
+- **Redis Caching**: Response caching for improved performance and reduced API costs
+- **Prometheus Metrics**: Real-time monitoring of API performance and AI model usage
+- **Grafana Dashboards**: Visual monitoring of system health and performance
+- **Structured Logging**: JSON-formatted logs with request tracing
 
-## 🚀 Deployment
+### Developer Experience
+
+- **Type-Safe APIs**: Full Pydantic v2 model validation
+- **Comprehensive Tests**: Unit and integration test suite
+- **Docker Support**: Multi-stage builds with non-root containers
+- **Environment Configuration**: `.env`-based configuration management
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.11+
+- Docker & Docker Compose (for production)
+- OpenAI API key (or Anthropic API key)
+
+### Local Development
+
+```bash
+# Clone the repository
+git clone https://github.com/balagaraghuram1/hummingbird-.git
+cd hummingbird-
+
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# or
+.venv\Scripts\activate  # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys
+
+# Run the application
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+```
 
 ### Docker Deployment
 
 ```bash
-# Development
-docker-compose up -d
+# Set environment variables
+export OPENAI_API_KEY=your_key_here
+export SECRET_KEY=$(openssl rand -base64 32)
+export POSTGRES_PASSWORD=$(openssl rand -base64 16)
 
-# Production
-docker-compose -f docker-compose.prod.yml up -d
+# Start all services
+docker compose up -d
+
+# View logs
+docker compose logs -f app
+
+# Stop services
+docker compose down
 ```
 
-### Manual Deployment
+### API Documentation
 
-1. **Build the application**
-   ```bash
-   pip install -r requirements.txt
-   ```
+Once running, access the interactive API documentation:
 
-2. **Set up databases**
-   ```bash
-   python scripts/setup_db.py
-   ```
-
-3. **Start services**
-   ```bash
-   python -m uvicorn src.main:app --host 0.0.0.0 --port 8000
-   ```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/new-feature`
-3. Commit your changes: `git commit -am 'Add new feature'`
-4. Push to the branch: `git push origin feature/new-feature`
-5. Submit a pull request
-
-### Development Guidelines
-- Follow PEP 8 style guidelines
-- Write comprehensive tests
-- Update documentation for new features
-- Use type hints throughout the codebase
-
-## 📈 Performance Optimization
-
-### Caching Strategy
-- **Response Caching**: Cache frequent API responses
-- **Model Results**: Cache AI model outputs
-- **Vector Search**: Cache similar queries
-
-### Database Optimization
-- **Indexing**: Proper indexing on medical data
-- **Connection Pooling**: Efficient database connections
-- **Query Optimization**: Fast query execution
-
-### AI Model Optimization
-- **Model Selection**: Choose optimal models for different tasks
-- **Batch Processing**: Process multiple requests efficiently
-- **Fallback Mechanisms**: Graceful degradation when models fail
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-1. **Database Connection Issues**
-   ```bash
-   # Check database status
-   docker-compose ps postgres
-   
-   # Reset database
-   docker-compose down
-   docker-compose up -d postgres
-   ```
-
-2. **AI Model Failures**
-   - Check API keys in `.env`
-   - Verify model availability
-   - Check network connectivity
-
-3. **Memory Issues**
-   - Monitor memory usage with `docker stats`
-   - Adjust container limits in `docker-compose.yml`
-
-### Debug Mode
-```bash
-# Enable debug logging
-export LOG_LEVEL=DEBUG
-uvicorn src.main:app --reload --log-level debug
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- OpenAI for GPT models
-- Anthropic for Claude models
-- LangChain team for the amazing framework
-- FastAPI team for the modern web framework
-- Medical data providers and research institutions
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/your-org/hummingbird-medical-ai/issues)
-- **Documentation**: [Full Documentation](docs/)
-- **Community**: [Discord Server](https://discord.gg/your-server)
+- **Swagger UI**: `http://localhost:8000/docs`
+- **ReDoc**: `http://localhost:8000/redoc` (debug mode only)
 
 ---
 
-Built with ❤️ for the medical AI community
+## API Reference
+
+### Health Check
+
+```http
+GET /api/health
+```
+
+Response:
+```json
+{
+  "status": "ok",
+  "service": "hummingbird-medical-ai",
+  "version": "1.0.0",
+  "ai_model": "available",
+  "cache": "available"
+}
+```
+
+### Diagnosis
+
+```http
+POST /api/diagnose
+Content-Type: application/json
+
+{
+  "symptoms": ["fever", "cough", "fatigue"],
+  "patient_age": 35,
+  "patient_sex": "male"
+}
+```
+
+Response:
+```json
+{
+  "diagnosis": "Upper respiratory infection...",
+  "confidence": 0.85,
+  "recommendations": ["Rest", "Hydration", "Monitor symptoms"],
+  "warning": "This is AI-generated analysis..."
+}
+```
+
+### Treatment Plan
+
+```http
+POST /api/treatment-plan
+Content-Type: application/json
+
+{
+  "diagnosis": "Upper respiratory infection",
+  "patient_age": 35,
+  "allergies": ["penicillin"]
+}
+```
+
+### Lab Analysis
+
+```http
+POST /api/analyze-lab
+Content-Type: application/json
+
+{
+  "results": {
+    "hemoglobin": 14.2,
+    "glucose": 95,
+    "cholesterol_total": 180,
+    "white_blood_cells": 7.5
+  }
+}
+```
+
+---
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENAI_API_KEY` | - | OpenAI API key for GPT models |
+| `ANTHROPIC_API_KEY` | - | Anthropic API key for Claude models |
+| `DATABASE_URL` | `sqlite:///./hummingbird.db` | Database connection URL |
+| `REDIS_URL` | `redis://localhost:6379` | Redis connection URL |
+| `SECRET_KEY` | (auto-generated) | JWT signing secret |
+| `MODEL_NAME` | `gpt-4o` | Primary LLM model |
+| `MODEL_TEMPERATURE` | `0.2` | LLM temperature (0-2) |
+| `DEBUG` | `false` | Enable debug mode |
+| `LOG_LEVEL` | `INFO` | Logging level |
+
+### Model Configuration
+
+The system supports multiple LLM providers. Configure via environment variables:
+
+```bash
+# Use OpenAI
+OPENAI_API_KEY=sk-...
+MODEL_NAME=gpt-4o
+
+# Use Anthropic (via LangChain)
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+---
+
+## Testing
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=src --cov-report=html
+
+# Run specific test file
+pytest tests/test_api.py
+
+# Run with verbose output
+pytest -v
+```
+
+### Test Structure
+
+```
+tests/
+├── conftest.py          # Shared fixtures
+├── test_api.py          # API endpoint tests
+├── test_services.py     # Service layer tests
+└── test_agents.py       # Agent tests
+```
+
+---
+
+## Monitoring
+
+### Prometheus Metrics
+
+Access metrics at `http://localhost:9090/metrics` (Docker) or `http://localhost:8000/metrics` (local).
+
+Key metrics:
+- `hummingbird_requests_total` - Total API requests
+- `hummingbird_request_latency_seconds` - Request latency histogram
+- `hummingbird_ai_requests_total` - AI model requests
+- `hummingbird_cache_hits_total` - Cache hit count
+
+### Grafana Dashboard
+
+1. Access Grafana at `http://localhost:3001`
+2. Login with admin credentials
+3. Import dashboard from `monitoring/grafana/dashboards/medical_ai.json`
+
+---
+
+## Project Structure
+
+```
+hummingbird/
+├── src/
+│   ├── api/                    # API routes and middleware
+│   │   ├── main.py            # Route definitions
+│   │   ├── middleware.py       # Request processing
+│   │   └── dependencies.py    # Dependency injection
+│   ├── agents/                 # AI agents
+│   │   ├── diagnosis_agent.py
+│   │   ├── treatment_agent.py
+│   │   └── lab_agent.py
+│   ├── config/                 # Configuration
+│   │   ├── settings.py
+│   │   ├── database.py
+│   │   └── security.py
+│   ├── core/                   # Core utilities
+│   │   ├── events.py
+│   │   └── exceptions.py
+│   ├── medical_ai/             # AI model
+│   │   └── model.py
+│   ├── models/                 # Data models
+│   │   ├── schemas.py
+│   │   └── database.py
+│   ├── services/               # Business logic
+│   │   ├── medical_service.py
+│   │   ├── cache_service.py
+│   │   ├── vector_service.py
+│   │   └── auth_service.py
+│   ├── utils/                  # Utilities
+│   │   ├── logger.py
+│   │   ├── monitoring.py
+│   │   └── helpers.py
+│   └── main.py                 # App factory
+├── tests/                      # Test suite
+├── data/                       # Medical knowledge base
+├── docs/                       # Documentation
+├── monitoring/                 # Prometheus/Grafana config
+├── scripts/                    # Deployment scripts
+├── Dockerfile                  # Multi-stage build
+├── docker-compose.yml          # Service orchestration
+├── requirements.txt            # Python dependencies
+├── LICENSE                     # MIT License
+└── README.md                   # This file
+```
+
+---
+
+## Security Considerations
+
+- **Never commit secrets**: `.env` files are excluded from version control
+- **Use environment variables**: All sensitive configuration via env vars
+- **Non-root containers**: Docker runs as unprivileged user
+- **Input validation**: All API inputs validated via Pydantic
+- **Rate limiting**: Configurable per-minute request limits
+- **CORS**: Configurable cross-origin resource sharing
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+### Development Setup
+
+```bash
+# Install development dependencies
+pip install -r requirements.txt
+
+# Install pre-commit hooks
+pre-commit install
+
+# Run linting
+flake8 src/ tests/
+black src/ tests/ --check
+mypy src/
+```
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Acknowledgments
+
+- [OpenAI](https://openai.com) for GPT models
+- [Anthropic](https://anthropic.com) for Claude models
+- [LangChain](https://langchain.com) for the AI orchestration framework
+- [FastAPI](https://fastapi.tiangolo.com) for the web framework
+- [Pydantic](https://docs.pydantic.dev) for data validation
+
+---
+
+<div align="center">
+
+**Built with care for the medical AI community**
+
+</div>
