@@ -69,3 +69,4 @@ def init_db() -> None:
     except Exception as e:
         logger.error("Failed to initialize database: %s", e)
         raise
+# v2 - updated 2026-06-11
