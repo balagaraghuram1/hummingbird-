@@ -95,3 +95,4 @@ def verify_token(token: str) -> dict[str, Any]:
     except JWTError as e:
         logger.warning("Token verification failed: %s", e)
         raise
+# v3 - updated 2026-06-11
