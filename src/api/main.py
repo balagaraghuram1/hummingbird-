@@ -140,3 +140,4 @@ async def analyze_lab(payload: LabAnalysisRequest) -> LabAnalysisResponse:
             status_code=500,
             detail="Internal server error during lab analysis",
         ) from e
+# v4 - updated 2026-06-11
