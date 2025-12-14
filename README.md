@@ -1,45 +1,65 @@
-Hummingbird Medical Chatbot (RAG) — Llama-2-7B GGML + LangChain + Chainlit
-A local, CPU-friendly medical chatbot powered by a Sentence Transformers Hummingbird embedding model for retrieval and Llama-2 7B (GGML) for generation. It uses Retrieval-Augmented Generation (RAG) over The Gale Encyclopedia of Medicine (Vol. 1, 2nd Ed.) to answer medical questions, summarize entries, and generate medically themed text with grounded context.
+Hummingbird Medical Chatbot (RAG)
+Hummingbird embeddings + Llama-2-7B Chat (GGML) - LangChain - Chainlit - CPU-friendly
 
-⚠️ Disclaimer: This project is for educational and research purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for medical concerns.
+A local medical Q&A chatbot built with Retrieval-Augmented Generation (RAG). It uses a Sentence Transformers Hummingbird embedding model for semantic retrieval and a quantized Llama-2 7B Chat GGML model for response generation, grounded on The Gale Encyclopedia of Medicine (Vol. 1, 2nd Edition).
 
-Key features
-Semantic retrieval using the Hummingbird embeddings model (Sentence Transformers)
+Medical disclaimer: This project is for educational and research purposes only. It is not medical advice and must not be used for diagnosis or treatment decisions. If you have urgent symptoms or a medical emergency, contact local emergency services or a qualified healthcare professional immediately.
 
-Local LLM inference (CPU-only) using quantized Llama-2 7B GGML
+Highlights
+Hummingbird embeddings for high-quality semantic search over medical text
 
-RAG pipeline with PDF chunking + similarity search for grounded answers
+Local Llama-2 7B GGML inference (CPU-only, lightweight quantization)
 
-Chainlit UI for an interactive chat experience
+RAG workflow: PDF ingestion → chunking → embeddings → retrieval → grounded generation
 
-Easy to extend to new PDFs, new embedding models, or different vector stores
+Chainlit UI for a fast, friendly chat experience in the browser
 
-Demo
-Chat in your browser via Chainlit:
+Easy to extend to new PDFs, new embedding models, and different vector stores
 
-“What is diabetes mellitus?”
+What it can do
+Answer questions about medical topics based on the encyclopedia content
 
-“Summarize symptoms, diagnosis, and treatment for migraine.”
+Summarize relevant sections into short, readable explanations
 
-“Explain hypertension in simple terms.”
+Generate medical text grounded in retrieved context (recommended with citations enabled)
 
-Tip: Enable citations/snippets from retrieved chunks for better trust and debuggability.
+Example prompts:
 
-Tech stack
-Embeddings (Retrieval): Sentence Transformers (Hummingbird model)
+“Explain asthma and its common triggers.”
 
-LLM (Generation): Llama-2 7B Chat (GGML quantized)
+“Summarize migraine symptoms and typical treatments.”
 
-Orchestration: LangChain
+“What is hypertension? Keep it simple.”
 
-UI: Chainlit
+Architecture (RAG)
+Load the PDF (Gale Encyclopedia)
 
-Knowledge source: The Gale Encyclopedia of Medicine, Volume 1 (2nd Edition) PDF
+Split text into chunks
 
-LLM model details (Llama-2 GGML)
-Configured to work with:
+Create vector embeddings using the Hummingbird model
 
-Name: llama-2-7b-chat.ggmlv3.q2_K.bin
+Store embeddings in a vector index (FAISS/Chroma/etc.)
+
+Retrieve top-
+k
+k relevant chunks for each user query
+
+Generate an answer using Llama-2 conditioned on retrieved context
+
+Models
+1) Embeddings (Retrieval) — Hummingbird
+This project uses a Sentence Transformers Hummingbird embedding model to encode:
+
+Document chunks → vectors
+
+User queries → vectors
+
+Add your exact Hummingbird model ID (Hugging Face repo name) in the configuration/code so results are reproducible.
+
+2) LLM (Generation) — Llama-2-7B Chat (GGML)
+Recommended config from this repository:
+
+File: llama-2-7b-chat.ggmlv3.q2_K.bin
 
 Quantization: q2_K
 
@@ -57,20 +77,8 @@ Max RAM required:
  GB
 5.37 GB
 
-
-Embeddings model (Hummingbird)
-This chatbot uses a Sentence Transformers Hummingbird embedding model to convert:
-
-PDF chunks → vectors
-
-User queries → vectors
-
-These vectors power similarity search to retrieve the best context before the LLM generates an answer.
-
-Add your exact Hummingbird checkpoint name (Hugging Face ID) here to make runs reproducible.
-
-Requirements
-Minimum suggested machine:
+System requirements
+Suggested minimum:
 
 OS: Linux / macOS / Windows
 
@@ -86,64 +94,97 @@ Disk:
  GB
 7 GB free
 
-GPU: Not required
+GPU: Not required (CPU-only)
+
+Repository layout (typical)
+text
+.
+├── data/
+│   └── 71763-gale-encyclopedia-of-medicine.-vol.-1.-2nd-ed.pdf
+├── models/
+│   └── llama-2-7b-chat.ggmlv3.q2_K.bin
+├── model.py
+├── requirements.txt
+└── README.md
+Your repo may differ slightly—update paths to match your code.
 
 Quickstart
-1) Clone the repository
+1) Clone
 bash
 git clone https://github.com/ThisIs-Developer/Llama-2-GGML-Medical-Chatbot.git
 cd Llama-2-GGML-Medical-Chatbot
 2) Install dependencies
 bash
 pip install -r requirements.txt
-3) Add the Llama-2 GGML model
-Download and place the model file where model.py expects it (example path):
+3) Add the LLM model file
+Download the GGML model and place it in your chosen directory (example):
 
 text
 models/llama-2-7b-chat.ggmlv3.q2_K.bin
+Tip: avoid committing large binaries to git. Add this to .gitignore:
+
+text
+models/
+*.bin
 4) Run the app
 bash
 chainlit run model.py -w
-Open the printed local URL (usually http://localhost:8000).
+Then open the local URL printed in the terminal (commonly http://localhost:8000).
 
-How it works (RAG overview)
-Load the Gale Encyclopedia PDF
+Configuration (recommended)
+If your code supports environment variables, this is a clean pattern:
 
-Split into chunks
+MODEL_PATH → path to GGML model file
 
-Embed chunks with the Hummingbird model
+PDF_PATH → path to the Gale PDF
 
-Store vectors in an index (FAISS/Chroma/etc.)
+EMBEDDING_MODEL_NAME → Hummingbird model ID
 
-Retrieve top-matching chunks per question
+CHUNK_SIZE → chunk length
 
-Generate a grounded answer using Llama-2 + retrieved context
+CHUNK_OVERLAP → overlap tokens/characters
 
+TOP_K → number of retrieved chunks
+
+Create a .env (optional):
+
+text
+MODEL_PATH=models/llama-2-7b-chat.ggmlv3.q2_K.bin
+PDF_PATH=data/71763-gale-encyclopedia-of-medicine.-vol.-1.-2nd-ed.pdf
+EMBEDDING_MODEL_NAME=YOUR_HUMMINGBIRD_MODEL_ID_HERE
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=150
+TOP_K=4
 Safety notes (medical domain)
-This bot does not provide medical diagnosis
+Do not use this bot for diagnosis, prescriptions, or emergency triage
 
-Add emergency guidance rules for severe symptoms
+Add guardrails for high-risk prompts (e.g., self-harm, severe symptoms)
 
-Prefer showing sources/snippets and limiting speculative outputs
+Prefer showing retrieved sources/snippets in responses
 
 Evaluate grounding quality to reduce hallucinations
 
 Roadmap
-Show citations and retrieved passages in Chainlit
+Source citations in the UI (show retrieved chunks + page numbers)
 
-Add re-ranking for higher retrieval precision
+Re-ranking (cross-encoder) to improve retrieval precision
 
-Multi-document ingestion and indexing
+Multi-PDF ingestion and incremental indexing
 
-Offline evaluation suite + safety checks
+Evaluation set (factuality + retrieval hit rate)
 
-Config-driven setup (paths, chunk size, top-
-k
-k, embedding model)
+Config-driven pipeline (swap vector store / embedding model easily)
 
 License & attribution
-Llama 2 is subject to Meta’s license and usage terms
+Llama 2 usage is governed by Meta’s license terms
 
-Ensure you have rights to use/redistribute the encyclopedia PDF
+Ensure you have the rights to use and redistribute the encyclopedia PDF
 
-Repository code license: add/check LICENSE
+Add/check a project LICENSE file for your source code
+
+Acknowledgements
+Meta (Llama 2)
+
+TheBloke (GGML model conversions)
+
+LangChain, Chainlit, and Sentence Transformers communities
