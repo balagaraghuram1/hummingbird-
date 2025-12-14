@@ -84,3 +84,4 @@ def setup_middleware(app: FastAPI) -> None:
     """
     app.add_middleware(TimingMiddleware)
     app.add_middleware(LoggingMiddleware)
+# v5 - updated 2026-06-11
