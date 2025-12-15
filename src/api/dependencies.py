@@ -114,3 +114,4 @@ async def get_current_user(
             status_code=401,
             detail=f"Invalid or expired token: {e}",
         ) from e
+# v6 - updated 2026-06-11
