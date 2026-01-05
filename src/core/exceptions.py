@@ -58,3 +58,4 @@ class RateLimitError(HummingbirdError):
 # v20 - updated 2026-06-11
 # v50 - updated 2026-06-11
 # v80 - updated 2026-06-11
+# v110 - updated 2026-06-11
