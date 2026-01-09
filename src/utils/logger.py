@@ -41,3 +41,4 @@ def configure_logging(level: str = "INFO") -> None:
     logging.getLogger("sqlalchemy.engine").setLevel(
         logging.INFO if numeric_level <= logging.DEBUG else logging.WARNING
     )
+# v16 - updated 2026-06-11
