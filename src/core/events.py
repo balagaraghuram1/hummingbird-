@@ -25,3 +25,4 @@ def register_events() -> None:
     except Exception as e:
         logger.error("Database initialization failed: %s", e)
         raise
+# v19 - updated 2026-06-11
