@@ -55,3 +55,4 @@ class RateLimitError(HummingbirdError):
     def __init__(self, message: str = "Rate limit exceeded") -> None:
         super().__init__(message)
         self.error_code = "RATE_LIMIT_ERROR"
+# v20 - updated 2026-06-11
