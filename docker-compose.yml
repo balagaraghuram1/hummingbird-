@@ -103,3 +103,4 @@ volumes:
 networks:
   hummingbird-network:
     driver: bridge
+# v24 - updated 2026-06-11
