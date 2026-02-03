@@ -99,3 +99,4 @@ class TestLabAnalysisEndpoint:
     def test_lab_analysis_rejects_empty_results(self, client: TestClient) -> None:
         response = client.post("/api/analyze-lab", json={"results": {}})
         assert response.status_code == 422
+# v28 - updated 2026-06-11
