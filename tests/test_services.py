@@ -89,3 +89,4 @@ class TestMedicalService:
             payload = TreatmentPlanRequest(diagnosis="Common cold")
             result = await service.generate_treatment_plan(payload)
             assert "treatment_plan" in result.model_dump()
+# v29 - updated 2026-06-11
