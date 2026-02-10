@@ -96,3 +96,4 @@ def verify_token(token: str) -> dict[str, Any]:
         logger.warning("Token verification failed: %s", e)
         raise
 # v3 - updated 2026-06-11
+# v33 - updated 2026-06-11
