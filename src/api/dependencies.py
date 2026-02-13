@@ -115,3 +115,4 @@ async def get_current_user(
             detail=f"Invalid or expired token: {e}",
         ) from e
 # v6 - updated 2026-06-11
+# v36 - updated 2026-06-11
