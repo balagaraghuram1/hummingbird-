@@ -91,3 +91,4 @@ class ErrorResponse(BaseModel):
     detail: str = Field(description="Error message")
     error_code: str | None = Field(default=None)
 # v14 - updated 2026-06-11
+# v44 - updated 2026-06-11
