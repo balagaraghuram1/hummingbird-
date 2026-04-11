@@ -1,0 +1,9 @@
+{
+  "treatments": [
+    {
+      "condition": "Influenza",
+      "plan": ["rest", "hydration", "clinical evaluation"]
+    }
+  ]
+}
+

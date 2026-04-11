@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Environments
+.env
+.venv/
+venv/
+
+# Data & logs
+logs/
+data/chroma_db/
+
+# IDE
+.idea/
+.vscode/
+
