@@ -1,0 +1,9 @@
+{
+  "diseases": [
+    {
+      "name": "Influenza",
+      "symptoms": ["fever", "cough", "fatigue"]
+    }
+  ]
+}
+

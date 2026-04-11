@@ -1,0 +1,13 @@
+{
+  "title": "Hummingbird Medical AI",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Request Latency",
+      "targets": []
+    }
+  ],
+  "schemaVersion": 36,
+  "version": 1
+}
+
