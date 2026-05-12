@@ -57,3 +57,4 @@ class RateLimitError(HummingbirdError):
         self.error_code = "RATE_LIMIT_ERROR"
 # v20 - updated 2026-06-11
 # v50 - updated 2026-06-11
+# v80 - updated 2026-06-11
