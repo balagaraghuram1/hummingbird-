@@ -91,3 +91,4 @@ class TestMedicalService:
             assert "treatment_plan" in result.model_dump()
 # v29 - updated 2026-06-11
 # v59 - updated 2026-06-11
+# v89 - updated 2026-06-11
