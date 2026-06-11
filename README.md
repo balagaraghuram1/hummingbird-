@@ -399,4 +399,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with care for the medical AI community**
 
+**Balaga Raghuram**
+
 </div>
