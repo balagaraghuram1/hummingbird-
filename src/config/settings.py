@@ -88,3 +88,11 @@ settings = get_settings()
 
     # CORS validation
     allowed_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000", "https://localhost:8000"])
+
+
+    @field_validator("model_temperature")
+    @classmethod
+    def validate_temperature(cls, v: float) -> float:
+        if not 0.0 <= v <= 2.0:
+            raise ValueError("Temperature must be between 0.0 and 2.0")
+        return v
