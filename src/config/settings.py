@@ -84,3 +84,7 @@ settings = get_settings()
 # v61 - updated 2026-06-11
 # v91 - updated 2026-06-11
 # v121 - updated 2026-06-11
+
+
+    # CORS validation
+    allowed_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000", "https://localhost:8000"])
