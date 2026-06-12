@@ -107,3 +107,8 @@ networks:
 # v54 - updated 2026-06-11
 # v84 - updated 2026-06-11
 # v114 - updated 2026-06-11
+
+
+  # Health check commands:
+  # docker compose ps
+  # curl http://localhost:8000/api/health
