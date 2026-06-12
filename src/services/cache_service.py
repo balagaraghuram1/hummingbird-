@@ -146,3 +146,7 @@ cache_service = CacheService()
 # v68 - updated 2026-06-11
 # v98 - updated 2026-06-11
 # v128 - updated 2026-06-11
+
+    async def get_json_async(self, key: str) -> dict | None:
+        "Async get from cache with Redis await support."
+        return self.get_json(key)
