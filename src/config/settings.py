@@ -96,3 +96,6 @@ settings = get_settings()
         if not 0.0 <= v <= 2.0:
             raise ValueError("Temperature must be between 0.0 and 2.0")
         return v
+
+
+    ai_request_timeout: int = Field(default=30, ge=1, le=300, description="AI request timeout in seconds")
