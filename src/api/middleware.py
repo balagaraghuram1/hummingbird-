@@ -89,3 +89,6 @@ def setup_middleware(app: FastAPI) -> None:
 # v65 - updated 2026-06-11
 # v95 - updated 2026-06-11
 # v125 - updated 2026-06-11
+
+# Slow query threshold in seconds
+SLOW_QUERY_THRESHOLD = 2.0
