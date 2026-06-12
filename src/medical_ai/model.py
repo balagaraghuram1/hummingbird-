@@ -228,3 +228,14 @@ class MedicalAIModel:
 
 
 medical_ai_model = MedicalAIModel()
+
+    async def _safe_llm_call(self, chain, inputs, retries: int = 3):
+        "Retry LLM calls with exponential backoff on transient errors."
+        import asyncio
+        for attempt in range(retries):
+            try:
+                return await chain.ainvoke(inputs)
+            except Exception as e:
+                if attempt == retries - 1:
+                    raise
+                await asyncio.sleep(2 ** attempt)
