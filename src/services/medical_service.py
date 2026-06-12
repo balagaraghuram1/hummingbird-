@@ -190,3 +190,11 @@ medical_service = MedicalService()
             deps["redis"] = "ok" if self.cache.is_available else "unavailable"
         deps["ai_model"] = "ok" if self.model.is_available else "unavailable"
         return deps
+
+    def get_service_status(self) -> dict:
+        "Get comprehensive service status."
+        return {
+            "ai_available": self.model.is_available,
+            "cache_available": self.cache.is_available if self.cache else False,
+            "service": "healthy"
+        }
