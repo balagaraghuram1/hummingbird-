@@ -79,3 +79,10 @@ def truncate_text(text: str, max_length: int = 100, suffix: str = "...") -> str:
 # v78 - updated 2026-06-11
 # v108 - updated 2026-06-11
 # v138 - updated 2026-06-11
+
+
+def sanitize_medical_text(text: str) -> str:
+    "Sanitize medical text input for LLM safety."
+    text = text.strip()
+    text = text[:5000]
+    return text
