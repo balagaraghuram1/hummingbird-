@@ -181,3 +181,12 @@ medical_service = MedicalService()
 # v67 - updated 2026-06-11
 # v97 - updated 2026-06-11
 # v127 - updated 2026-06-11
+
+
+    async def check_dependencies(self) -> dict:
+        "Check health of all service dependencies."
+        deps = {}
+        if self.cache:
+            deps["redis"] = "ok" if self.cache.is_available else "unavailable"
+        deps["ai_model"] = "ok" if self.model.is_available else "unavailable"
+        return deps
