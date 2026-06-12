@@ -46,3 +46,9 @@ def configure_logging(level: str = "INFO") -> None:
 # v76 - updated 2026-06-11
 # v106 - updated 2026-06-11
 # v136 - updated 2026-06-11
+
+def get_request_logger(request_id: str) -> logging.Logger:
+    "Create a logger with request context for tracing."
+    logger = logging.getLogger("hummingbird.request")
+    extra = {"request_id": request_id}
+    return logging.LoggerAdapter(logger, extra)
