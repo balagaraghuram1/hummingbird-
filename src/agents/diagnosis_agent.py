@@ -63,7 +63,7 @@ class DiagnosisAgent:
             logger.warning("Diagnosis agent initialization failed: %s", e)
             self._initialized = True
 
-    async def run(self, symptoms: list[str]) -> dict[str, Any]:
+    async def run(self, symptoms: list[str], context: dict | None = None) -> dict[str, Any]:
         """Run diagnosis on patient symptoms.
 
         Args:
