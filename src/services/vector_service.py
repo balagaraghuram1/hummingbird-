@@ -105,3 +105,14 @@ vector_service = VectorService()
 # v69 - updated 2026-06-11
 # v99 - updated 2026-06-11
 # v129 - updated 2026-06-11
+
+
+    def get_collection_stats(self) -> dict:
+        "Get vector store collection statistics."
+        if not self._available or self._store is None:
+            return {"status": "unavailable"}
+        try:
+            collection = self._store._collection
+            return {"count": collection.count(), "status": "ok"}
+        except Exception:
+            return {"status": "error"}
