@@ -100,3 +100,9 @@ def verify_token(token: str) -> dict[str, Any]:
 # v63 - updated 2026-06-11
 # v93 - updated 2026-06-11
 # v123 - updated 2026-06-11
+
+def rotate_secret_key(old_key: str, new_key: str, token: str) -> str:
+    "Rotate secret key for existing JWT tokens."
+    from jose import jwt
+    payload = jwt.decode(token, old_key, algorithms=["HS256"])
+    return jwt.encode(payload, new_key, algorithm="HS256")
