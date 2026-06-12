@@ -60,3 +60,11 @@ class RateLimitError(HummingbirdError):
 # v80 - updated 2026-06-11
 # v110 - updated 2026-06-11
 # v140 - updated 2026-06-11
+
+
+class RateLimitError(HummingbirdError):
+    "Raised when rate limit is exceeded."
+    def __init__(self, message: str = "Rate limit exceeded", retry_after: int = 60) -> None:
+        super().__init__(message)
+        self.error_code = "RATE_LIMIT_ERROR"
+        self.retry_after = retry_after
