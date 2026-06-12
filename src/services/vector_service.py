@@ -116,3 +116,7 @@ vector_service = VectorService()
             return {"count": collection.count(), "status": "ok"}
         except Exception:
             return {"status": "error"}
+
+    def get_embedding_dimensions(self) -> int:
+        "Get the dimension of embeddings used by this vector store."
+        return 384  # all-MiniLM-L6-v2 default
