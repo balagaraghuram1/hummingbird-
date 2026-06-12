@@ -145,3 +145,8 @@ async def analyze_lab(payload: LabAnalysisRequest) -> LabAnalysisResponse:
 # v64 - updated 2026-06-11
 # v94 - updated 2026-06-11
 # v124 - updated 2026-06-11
+
+@api_router.get("/model-info", tags=["Monitoring"])
+async def model_info() -> dict:
+    "Get AI model configuration info."
+    return {"model": settings.model_name, "available": medical_service.model.is_available}
