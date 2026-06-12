@@ -150,3 +150,8 @@ cache_service = CacheService()
     async def get_json_async(self, key: str) -> dict | None:
         "Async get from cache with Redis await support."
         return self.get_json(key)
+
+
+    def get_stats(self) -> dict:
+        "Get cache statistics and connection status."
+        return {"available": self._available, "type": "redis"}
