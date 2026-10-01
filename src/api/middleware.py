@@ -84,15 +84,8 @@ def setup_middleware(app: FastAPI) -> None:
     """
     app.add_middleware(TimingMiddleware)
     app.add_middleware(LoggingMiddleware)
-# v5 - updated 2026-06-11
-# v35 - updated 2026-06-11
-# v65 - updated 2026-06-11
-# v95 - updated 2026-06-11
-# v125 - updated 2026-06-11
 
-# Slow query threshold in seconds
-SLOW_QUERY_THRESHOLD = 2.0
-
+    @app.middleware("http")
     async def add_security_headers(request: Request, call_next):
         "Add security headers to all API responses."
         response = await call_next(request)
@@ -101,3 +94,13 @@ SLOW_QUERY_THRESHOLD = 2.0
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         return response
+
+
+# v5 - updated 2026-06-11
+# v35 - updated 2026-06-11
+# v65 - updated 2026-06-11
+# v95 - updated 2026-06-11
+# v125 - updated 2026-06-11
+
+# Slow query threshold in seconds
+SLOW_QUERY_THRESHOLD = 2.0

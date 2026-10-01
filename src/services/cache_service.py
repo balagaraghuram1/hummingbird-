@@ -139,14 +139,6 @@ class CacheService:
         self._ensure_client()
         return self._available
 
-
-cache_service = CacheService()
-# v8 - updated 2026-06-11
-# v38 - updated 2026-06-11
-# v68 - updated 2026-06-11
-# v98 - updated 2026-06-11
-# v128 - updated 2026-06-11
-
     async def get_json_async(self, key: str) -> dict | None:
         "Async get from cache with Redis await support."
         return self.get_json(key)
@@ -155,3 +147,11 @@ cache_service = CacheService()
     def get_stats(self) -> dict:
         "Get cache statistics and connection status."
         return {"available": self._available, "type": "redis"}
+
+
+cache_service = CacheService()
+# v8 - updated 2026-06-11
+# v38 - updated 2026-06-11
+# v68 - updated 2026-06-11
+# v98 - updated 2026-06-11
+# v128 - updated 2026-06-11

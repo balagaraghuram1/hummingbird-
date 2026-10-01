@@ -174,15 +174,6 @@ class MedicalService:
             cache=cache_status,
         )
 
-
-medical_service = MedicalService()
-# v7 - updated 2026-06-11
-# v37 - updated 2026-06-11
-# v67 - updated 2026-06-11
-# v97 - updated 2026-06-11
-# v127 - updated 2026-06-11
-
-
     async def check_dependencies(self) -> dict:
         "Check health of all service dependencies."
         deps = {}
@@ -198,3 +189,11 @@ medical_service = MedicalService()
             "cache_available": self.cache.is_available if self.cache else False,
             "service": "healthy"
         }
+
+
+medical_service = MedicalService()
+# v7 - updated 2026-06-11
+# v37 - updated 2026-06-11
+# v67 - updated 2026-06-11
+# v97 - updated 2026-06-11
+# v127 - updated 2026-06-11

@@ -83,3 +83,11 @@ docs/
 # v55 - updated 2026-06-11
 # v85 - updated 2026-06-11
 # v115 - updated 2026-06-11
+
+# Security additions
+*.pem
+*.key
+node_modules/
+.env*
+
+!.env.example

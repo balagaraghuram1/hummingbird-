@@ -231,6 +231,8 @@ Content-Type: application/json
 | `DEBUG` | `false` | Enable debug mode |
 | `LOG_LEVEL` | `INFO` | Logging level |
 
+> **Security:** real values for `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `SECRET_KEY` etc. belong only in `.env` (git-ignored). Commit `.env.example` placeholders, never real keys. Tests generate their password per run (`TEST_PASSWORD` env var optional).
+
 ### Model Configuration
 
 The system supports multiple LLM providers. Configure via environment variables:

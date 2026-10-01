@@ -5,6 +5,8 @@ Tests the medical service, cache service, and auth service.
 
 from __future__ import annotations
 
+import os
+import secrets
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -14,22 +16,28 @@ from src.services.medical_service import MedicalService
 from src.models.schemas import DiagnosisRequest, TreatmentPlanRequest
 
 
+@pytest.fixture()
+def test_password() -> str:
+    """Password for this run: env override or random value. Never hardcoded."""
+    return os.environ.get("TEST_PASSWORD") or secrets.token_urlsafe(16)
+
+
 class TestAuthService:
     """Tests for the authentication service."""
 
-    def test_password_hash_and_verify(self) -> None:
-        password = "REDACTED_TEST_PASSWORD"
+    def test_password_hash_and_verify(self, test_password: str) -> None:
+        password = test_password
         hashed = auth_service.hash_password(password)
         assert auth_service.check_password(password, hashed)
 
-    def test_password_hash_different_each_time(self) -> None:
-        password = "REDACTED_TEST_PASSWORD"
+    def test_password_hash_different_each_time(self, test_password: str) -> None:
+        password = test_password
         hash1 = auth_service.hash_password(password)
         hash2 = auth_service.hash_password(password)
         assert hash1 != hash2
 
-    def test_wrong_password_fails(self) -> None:
-        hashed = auth_service.hash_password("REDACTED_TEST_PASSWORD")
+    def test_wrong_password_fails(self, test_password: str) -> None:
+        hashed = auth_service.hash_password(test_password)
         assert not auth_service.check_password("WrongPassword", hashed)
 
     def test_issue_token_returns_string(self) -> None:

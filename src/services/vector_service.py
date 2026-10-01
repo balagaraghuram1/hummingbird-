@@ -98,15 +98,6 @@ class VectorService:
         self._ensure_initialized()
         return self._available
 
-
-vector_service = VectorService()
-# v9 - updated 2026-06-11
-# v39 - updated 2026-06-11
-# v69 - updated 2026-06-11
-# v99 - updated 2026-06-11
-# v129 - updated 2026-06-11
-
-
     def get_collection_stats(self) -> dict:
         "Get vector store collection statistics."
         if not self._available or self._store is None:
@@ -120,3 +111,11 @@ vector_service = VectorService()
     def get_embedding_dimensions(self) -> int:
         "Get the dimension of embeddings used by this vector store."
         return 384  # all-MiniLM-L6-v2 default
+
+
+vector_service = VectorService()
+# v9 - updated 2026-06-11
+# v39 - updated 2026-06-11
+# v69 - updated 2026-06-11
+# v99 - updated 2026-06-11
+# v129 - updated 2026-06-11
