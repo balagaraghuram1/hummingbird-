@@ -17,7 +17,7 @@ sqlalchemy>=2.0.0
 
 # FastAPI and web framework
 fastapi>=0.104.0
-uvicorn[standard]>=0.24.0
+uvicorn[standard]>=0.54.0
 pydantic>=2.5.0
 pydantic-settings>=2.1.0
 python-multipart>=0.0.6
